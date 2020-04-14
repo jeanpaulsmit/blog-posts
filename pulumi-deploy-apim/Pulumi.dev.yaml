@@ -1,0 +1,21 @@
+encryptionsalt: v1:N/KoH3bUUQE=:v1:Q6qcwXx9hT1xsh2A:J89O/hCqzmaCb88Z68ura8T7rgXsGA==
+config:
+  didago-apim:azureLocation: westeurope
+  didago-apim:azureRegion: we
+  didago-apim:prefix: didago
+  didago-apim:resourceFunction: apim
+  didago-apim:environment: dev
+  didago-apim:publisherName: Didago IT Consultancy
+  didago-apim:publisherEmail: apim-dev@didago.nl
+  didago-apim:customDomainsHostName: "*.didago.nl"
+  didago-apim:customDomainsCertificateName: cert.pfx
+  didago-apim:customDomainsCertificateIssuer: Self
+  didago-apim:customDomainsCertificatePasword: Test123
+  didago-apim:productId: some-product
+  didago-apim:productName: Some Product
+  didago-apim:productSubscriptionRequired: true
+  didago-apim:productSubscriptionLimit: 10
+  didago-apim:productSubscriptionKey: some-custom-key-guid-dev
+  didago-apim:productAdminSubscriptionKey: admin-some-custom-key-guid-dev
+  didago-apim:productApprovalRequired: true
+  didago-apim:productPublished: true

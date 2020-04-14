@@ -1,0 +1,3 @@
+name: didago-apim
+runtime: dotnet
+description: Test project creating APIM
