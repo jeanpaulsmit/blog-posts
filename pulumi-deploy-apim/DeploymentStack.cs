@@ -6,6 +6,7 @@ using Pulumi.Azure.KeyVault.Inputs;
 using Pulumi.Azure.ApiManagement;
 using Pulumi.Azure.ApiManagement.Inputs;
 using Pulumi.Azure.AppInsights;
+using System;
 
 class DeploymentStack : Stack
 {
@@ -32,7 +33,7 @@ class DeploymentStack : Stack
         var currentPrincipal = clientConfig.Apply(c => c.ObjectId);
 
         // Create the Azure Resource Group
-        var rg = new ResourceGroup(rgName, new ResourceGroupArgs()
+        var rg = new ResourceGroup("rg", new ResourceGroupArgs()
         {
             Name = rgName,
             Location = config.Require("azureLocation"),
@@ -40,7 +41,7 @@ class DeploymentStack : Stack
         });
 
         // Create the storage account to contain policy, OpenApi and other deployment related files
-        var sa = new Account(storageAccountName, new AccountArgs
+        var sa = new Account("sa", new AccountArgs
         {
             ResourceGroupName = rg.Name,
             Name = storageAccountName,
@@ -63,7 +64,7 @@ class DeploymentStack : Stack
                              new CustomResourceOptions() { DependsOn = { rg } });
 
         // Create key vault to contain the certificate secret
-        var kv = new KV.KeyVault(kvName, new KV.KeyVaultArgs()
+        var kv = new KV.KeyVault("kv", new KV.KeyVaultArgs()
         {
             Name = kvName,
             ResourceGroupName = rg.Name,
@@ -83,43 +84,43 @@ class DeploymentStack : Stack
             Tags = tags
         });
 
-        // Upload the certificate to Key Vault
-        var pfxBytes = System.IO.File.ReadAllBytes("certificates/"+ config.Require("customDomainsCertificateName"));
-        var cert = new KV.Certificate("apim-tls-certificate", new KV.CertificateArgs()
-        {
-            Name = "apim-tls-certificate",
-            KeyVaultId = kv.Id,
-            KeyVaultCertificate = new CertificateCertificateArgs()
-            {
-                Contents = System.Convert.ToBase64String(pfxBytes),
-                Password = config.Require("customDomainsCertificatePasword")
-            },
-            CertificatePolicy = new CertificateCertificatePolicyArgs()
-            {
-                IssuerParameters = new CertificateCertificatePolicyIssuerParametersArgs()
-                {
-                    Name = config.Require("customDomainsCertificateIssuer")
-                },
-                KeyProperties = new CertificateCertificatePolicyKeyPropertiesArgs()
-                {
-                    Exportable = true,
-                    KeySize = 2048,
-                    KeyType = "RSA",
-                    ReuseKey = false
-                },
-                SecretProperties = new CertificateCertificatePolicySecretPropertiesArgs()
-                {
-                    ContentType = "application/x-pkcs12"
-                }
-            }
-        },
-        new CustomResourceOptions()
-        {
-            DependsOn = { rg, kv }
-        });
+        // Upload the certificate to Key Vault --> Currently disabled because no valid pfx which breaks the deployment
+        // var pfxBytes = System.IO.File.ReadAllBytes("certificates/"+ config.Require("customDomainsCertificateName"));
+        // var cert = new KV.Certificate("apim-tls-certificate", new KV.CertificateArgs()
+        // {
+        //     Name = "apim-tls-certificate",
+        //     KeyVaultId = kv.Id,
+        //     KeyVaultCertificate = new CertificateCertificateArgs()
+        //     {
+        //         Contents = System.Convert.ToBase64String(pfxBytes),
+        //         Password = config.Require("customDomainsCertificatePasword")
+        //     },
+        //     CertificatePolicy = new CertificateCertificatePolicyArgs()
+        //     {
+        //         IssuerParameters = new CertificateCertificatePolicyIssuerParametersArgs()
+        //         {
+        //             Name = config.Require("customDomainsCertificateIssuer")
+        //         },
+        //         KeyProperties = new CertificateCertificatePolicyKeyPropertiesArgs()
+        //         {
+        //             Exportable = true,
+        //             KeySize = 2048,
+        //             KeyType = "RSA",
+        //             ReuseKey = false
+        //         },
+        //         SecretProperties = new CertificateCertificatePolicySecretPropertiesArgs()
+        //         {
+        //             ContentType = "application/x-pkcs12"
+        //         }
+        //     }
+        // },
+        // new CustomResourceOptions()
+        // {
+        //     DependsOn = { rg, kv }
+        // });
 
         // APIM resource
-        var apim = new Service(apimName, new ServiceArgs()
+        var apim = new Service("apim", new ServiceArgs()
         {
             Name = apimName,
             ResourceGroupName = rg.Name,
@@ -134,6 +135,7 @@ class DeploymentStack : Stack
         },
         new CustomResourceOptions()
         {
+            CustomTimeouts = new CustomTimeouts { Create = TimeSpan.FromMinutes(60) },
             DependsOn = { rg, sa, kv  }
         });
 
@@ -148,10 +150,10 @@ class DeploymentStack : Stack
         // });
 
         // Set custom domain
-        // some powershell
+        // Call Powershell to assign custom domain to APIM instance
 
         // Create product on APIM
-        var apimProduct = new Product(config.Require("productName"), new ProductArgs()
+        var apimProduct = new Product("apimProduct", new ProductArgs()
         {
             ResourceGroupName = rg.Name,
             ApiManagementName = apim.Name,
@@ -166,11 +168,11 @@ class DeploymentStack : Stack
         {
             DependsOn = { apim }
         });
-        var apimProductPolicy = new ProductPolicy(config.Require("productName"), new ProductPolicyArgs()
+        var apimProductPolicy = new ProductPolicy("apimProductPolicy", new ProductPolicyArgs()
         {
             ResourceGroupName = rg.Name,
             ApiManagementName = apim.Name,
-            ProductId = apimProduct.Id,
+            ProductId = config.Require("productId"),
             XmlContent = @"<policies>
                             <inbound>
                                 <base />
@@ -200,7 +202,7 @@ class DeploymentStack : Stack
             ResourceGroupName = rg.Name,
             ApiManagementName = apim.Name,
             UserId = string.Format("{0}-user", config.Require("productId")),
-            Email = string.Format("{0}-{1}@didago.nl", config.Require("productName"), config.Require("environment")),
+            Email = string.Format("{0}-{1}@didago.nl", config.Require("productId"), config.Require("environment")),
             FirstName = "user",
             LastName = config.Require("productName"),
             State = "active"
@@ -236,6 +238,7 @@ class DeploymentStack : Stack
         // Create APIM diagnostics logger
         var apimLogger = new Logger("apimLogger", new LoggerArgs()
         {
+            Name = $"{apimName}-logger",
             ResourceGroupName = rg.Name,
             ApiManagementName = apim.Name,
             ApplicationInsights = new LoggerApplicationInsightsArgs()
@@ -267,7 +270,7 @@ class DeploymentStack : Stack
             ResourceGroupName = rg.Name,
             ApiManagementName = apim.Name,
             ApiName = apiHealthProbe.Name,
-            DisplayName = "Health probe",
+            DisplayName = "Ping",
             Method = "GET",
             UrlTemplate = "/",
             OperationId = "get-ping"
