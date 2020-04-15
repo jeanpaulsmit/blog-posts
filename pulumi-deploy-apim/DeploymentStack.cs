@@ -143,7 +143,7 @@ class DeploymentStack : Stack
         // var kvApimPolicy = new KV.AccessPolicy("apim-policy", new KV.AccessPolicyArgs()
         // {
         //     TenantId = tenantId,
-        //     ObjectId = apim.Identity.ObjectId,
+        //     ObjectId = apim.Identity.PrincipalId,
         //     SecretPermissions = {"get"},
         //     CertificatePermissions = {"get", "list"},
         //     KeyVaultId = kv.Id
