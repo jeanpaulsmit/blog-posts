@@ -14,10 +14,10 @@ tags = {
 apimSku = "Standard"
 apimSkuCapacity = 1
 apimPublisherName = "Didago IT Consultancy"
-apimPublisherEmail = "apim@didago.nl"
+apimPublisherEmail = "apim@company.com"
 
 apimProxyHostConfig = {
-    hostName = "*.didago.nl"
+    hostName = "*.company.com"
     certificateName ="cert.pfx"
     certificateIssuer ="Self"
     certificatePasword ="Test123"
