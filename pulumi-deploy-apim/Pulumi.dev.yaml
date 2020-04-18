@@ -6,8 +6,8 @@ config:
   didago-apim:resourceFunction: apim
   didago-apim:environment: dev
   didago-apim:publisherName: Didago IT Consultancy
-  didago-apim:publisherEmail: apim-dev@didago.nl
-  didago-apim:customDomainsHostName: "*.didago.nl"
+  didago-apim:publisherEmail: apim-dev@company.com
+  didago-apim:customDomainsHostName: "*.company.com"
   didago-apim:customDomainsCertificateName: cert.pfx
   didago-apim:customDomainsCertificateIssuer: Self
   didago-apim:customDomainsCertificatePasword: Test123
