@@ -83,3 +83,45 @@ resource apimLogger 'Microsoft.ApiManagement/service/loggers@2019-12-01' = {
   }
 }
 
+// Create a product
+resource apimProduct 'Microsoft.ApiManagement/service/products@2019-12-01' = {
+  name: '${apim.name}/custom-product'
+  properties: {
+    approvalRequired: true
+    subscriptionRequired: true
+    displayName: 'Custom product'
+    state: 'published'
+  }
+}
+
+// Add custom policy to product
+resource apimProductPolicy 'Microsoft.ApiManagement/service/products/policies@2019-12-01' = {
+  name: '${apimProduct.name}/policy'
+  properties: {
+    format: 'rawxml'
+    value: '<policies><inbound><base /></inbound><backend><base /></backend><outbound><set-header name="Server" exists-action="delete" /><set-header name="X-Powered-By" exists-action="delete" /><set-header name="X-AspNet-Version" exists-action="delete" /><base /></outbound><on-error><base /></on-error></policies>'
+  }
+}
+
+// Add User
+resource apimUser 'Microsoft.ApiManagement/service/users@2019-12-01' = {
+  name: '${apim.name}/custom-user'
+  properties: {
+    firstName: 'Custom'
+    lastName: 'User'
+    state: 'active'
+    email: 'custom-user-email@address.com'
+  }
+}
+
+// Add Subscription
+resource apimSubscription 'Microsoft.ApiManagement/service/subscriptions@2019-12-01' = {
+  name: '${apim.name}/custom-subscription'
+  properties: {
+    displayName: 'Custom Subscription'
+    primaryKey: 'custom-primary-key-${uniqueString(resourceGroup().id)}'
+    secondaryKey: 'custom-secondary-key-${uniqueString(resourceGroup().id)}'
+    state: 'active'
+    scope: '/products/${apimProduct.id}'
+  }
+}
