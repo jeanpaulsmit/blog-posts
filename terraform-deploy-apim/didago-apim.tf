@@ -209,7 +209,7 @@ resource "azurerm_api_management_user" "user" {
   resource_group_name = azurerm_resource_group.rg.name
   first_name          = "User"
   last_name           = var.product.productName
-  email               = "${var.product.productId}-${var.environment}@didago.nl"
+  email               = "${var.product.productId}-${var.environment}@yourcompany.nl"
   state               = "active"
 }
 

@@ -202,7 +202,7 @@ class DeploymentStack : Stack
             ResourceGroupName = rg.Name,
             ApiManagementName = apim.Name,
             UserId = string.Format("{0}-user", config.Require("productId")),
-            Email = string.Format("{0}-{1}@didago.nl", config.Require("productId"), config.Require("environment")),
+            Email = string.Format("{0}-{1}@yourcompany.nl", config.Require("productId"), config.Require("environment")),
             FirstName = "user",
             LastName = config.Require("productName"),
             State = "active"
