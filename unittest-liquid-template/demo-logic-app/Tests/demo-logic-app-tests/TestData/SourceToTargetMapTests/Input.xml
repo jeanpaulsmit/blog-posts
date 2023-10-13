@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DemoIncomingMessage>
+    <Id>12345</Id>
+    <Field1>data1</Field1>
+    <Field2>12345</Field2>
+    <Field3>2023-10-12T08:00:00Z</Field3>
+</DemoIncomingMessage>

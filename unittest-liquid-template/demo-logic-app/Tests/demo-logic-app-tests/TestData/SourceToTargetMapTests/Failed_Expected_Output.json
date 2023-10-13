@@ -1,0 +1,10 @@
+{
+  "demoData": {
+    "fields": {
+      "id": "12345",
+      "field1": "not-mapped-correctly",
+      "field2": 12345,
+      "field3": "not-a-correct-value"
+    }
+  }
+}
