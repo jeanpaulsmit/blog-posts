@@ -35,12 +35,22 @@ function Get-ContainerAppScalingDetails {
 
     try {
         $containerApp = Get-AzContainerApp -ResourceGroupName $ResourceGroupName -Name $ContainerAppName
+
+        # Extract scaling rules
+        $scalingRules = $containerApp.ScaleRule | ForEach-Object {
+            [PSCustomObject]@{
+                Name     = $_.Name
+                Type     = $_.CustomType
+            }
+        }
+
         $scalingDetails = @{
-            ContainerAppName = $ContainerAppName
-            CPU              = $containerApp.TemplateContainer[0].ResourceCpu
-            Memory           = $containerApp.TemplateContainer[0].ResourceMemory
-            Replicas         = $containerApp.Template.Scale.MinReplicas
-            CustomScalingRules = $containerApp.Properties.Template.Scale.Rules
+            ContainerAppName    = $ContainerAppName
+            CPU                 = $containerApp.TemplateContainer[0].ResourceCpu
+            Memory              = $containerApp.TemplateContainer[0].ResourceMemory
+            MinReplicas         = $containerApp.ScaleMinReplica
+            MaxReplicas         = $containerApp.ScaleMaxReplica
+            CustomScalingRules  = $scalingRules
         }
         return $scalingDetails
     }
